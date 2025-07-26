@@ -2,14 +2,28 @@
 import React from 'react'
 import FunctionButton from '../components/FunctionButton'
 import { useTheme } from 'next-themes'
+import { useRouter } from 'next/navigation'
 
 const HomePage: React.FC = () => {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
+  const router = useRouter()
 
   const handlePress = (action: string) => {
     console.log(`Button pressed: ${action}`)
-    // Replace with router.push(...) if needed
+    
+    switch(action) {
+      case '查看库存':
+        router.push('/view-stock')
+        break
+      case '查看入库':
+        router.push('/stock-in')
+        break
+      case '查看出库':
+        router.push('/stock-out')
+        break
+      // Add other cases as needed
+    }
   }
   
 

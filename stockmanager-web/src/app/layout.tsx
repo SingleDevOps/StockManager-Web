@@ -10,9 +10,15 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="zh" suppressHydrationWarning>
-      <body className="transition-colors duration-300">
+      <head>
+        <title>库存管理系统</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </head>
+      <body className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
+          <div className="container mx-auto px-4 py-8">
+            {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>
