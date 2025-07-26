@@ -4,16 +4,15 @@ import React, { useState, useEffect } from 'react'
 import { 查看入库 } from '../../../backend/database'
 import { useRouter } from 'next/navigation'
 
-interface 入库数据 {
-  日期: string
-  货物编码: string
-  货物名称: string
-  尺码: string
-  数量: number
-  备注: string
-  颜色: string
+interface 入库数据{
+    日期: string;
+    货物编码: string;
+    货物名称: string;
+    尺码: string;
+    数量: number;
+    备注: string;
+    颜色: string;
 }
-
 export default function StockInPage() {
   const [stockInData, setStockInData] = useState<入库数据[]>([])
   const [filteredData, setFilteredData] = useState<入库数据[]>([])
@@ -48,17 +47,20 @@ export default function StockInPage() {
     fetchData()
   }, [])
 
-  useEffect(() => {
-    const filtered = stockInData.filter(item =>
-      filterFields.every(field =>
-        item[field.key as keyof 入库数据]
-          ?.toString()
-          .toLowerCase()
-          .includes(filters[field.key]?.toLowerCase() || '')
-      )
-    )
-    setFilteredData(filtered)
-  }, [stockInData, filters])
+useEffect(() => {
+  const filtered = stockInData.filter(item =>
+    filterFields.every(field => {
+      const filterValue = filters[field.key]?.toLowerCase().trim();
+      if (!filterValue) return true; // If no filter value, include all items
+      
+      const itemValue = item[field.key as keyof 入库数据];
+      if (itemValue == null) return false; // If item value is null/undefined, don't match
+      
+      return itemValue.toString().toLowerCase().includes(filterValue);
+    })
+  );
+  setFilteredData(filtered);
+}, [stockInData, filters]);
 
   const handleChange = (key: string, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }))

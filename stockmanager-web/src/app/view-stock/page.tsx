@@ -1,19 +1,20 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
-import { 查看库存 } from '../../../backend/database';
+import React, { useState, useEffect } from 'react'
+import { 查看库存 } from '../../../backend/database'
+import { useRouter } from 'next/navigation'
 
-interface 库存数据 {
-  货物编码: string
-  货物种类: string
-  商标: string
-  颜色: string
-  尺码: string
-  初始库存: number
-  采购数量: number
-  销售数量: number
-  当前库存: number
-  货物名称: string
+interface 库存数据{
+    货物编码: string;
+    货物种类: string;
+    商标: string;
+    颜色: string;
+    尺码: string;
+    初始库存: number;
+    采购数量: number;
+    销售数量: number;
+    当前库存: number;
+    货物名称: string;
 }
 
 export default function ViewStockPage() {
@@ -22,6 +23,7 @@ export default function ViewStockPage() {
   const [filteredData, setFilteredData] = useState<库存数据[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
   const filterFields = [
     { label: '货物编码', key: '货物编码' },
@@ -51,23 +53,43 @@ export default function ViewStockPage() {
 
   useEffect(() => {
     const filtered = stockData.filter(item =>
-      filterFields.every(field =>
-        item[field.key as keyof 库存数据]
-          ?.toString()
-          .toLowerCase()
-          .includes(filters[field.key]?.toLowerCase() || '')
-      )
-    )
-    setFilteredData(filtered)
+      filterFields.every(field => {
+        // If no filter value, include all items
+        const filterValue = filters[field.key]?.toLowerCase().trim();
+        if (!filterValue) return true;
+        
+        // Get the item value for this field
+        const itemValue = item[field.key as keyof 库存数据];
+        
+        // If item value is null/undefined, don't match
+        if (itemValue == null) return false;
+        
+        // Convert to string and check if it includes the filter value
+        return itemValue.toString().toLowerCase().includes(filterValue);
+      })
+    );
+    setFilteredData(filtered);
   }, [stockData, filters])
 
   const handleChange = (key: string, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }))
   }
 
+  const handleBack = () => {
+    router.back()
+  }
+
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">查看库存</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">查看库存</h1>
+        <button 
+          onClick={handleBack}
+          className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+        >
+          返回
+        </button>
+      </div>
 
       {/* Filter Form */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6 bg-white dark:bg-zinc-800 p-4 rounded shadow">

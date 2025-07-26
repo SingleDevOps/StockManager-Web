@@ -4,14 +4,14 @@ import React, { useState, useEffect } from 'react'
 import { 查看出库 } from '../../../backend/database'
 import { useRouter } from 'next/navigation'
 
-interface 出库数据 {
-  日期: string
-  货物编码: string
-  货物名称: string
-  尺码: string
-  数量: number
-  备注: string
-  颜色: string
+interface 出库数据{
+    日期: string;
+    货物名称: string;
+    货物编码: string;
+    尺码: string;
+    数量: number;
+    备注: string;
+    颜色: string;
 }
 
 export default function StockOutPage() {
@@ -50,14 +50,22 @@ export default function StockOutPage() {
 
   useEffect(() => {
     const filtered = stockOutData.filter(item =>
-      filterFields.every(field =>
-        item[field.key as keyof 出库数据]
-          ?.toString()
-          .toLowerCase()
-          .includes(filters[field.key]?.toLowerCase() || '')
-      )
-    )
-    setFilteredData(filtered)
+      filterFields.every(field => {
+        // If no filter value, include all items
+        const filterValue = filters[field.key]?.toLowerCase().trim();
+        if (!filterValue) return true;
+        
+        // Get the item value for this field
+        const itemValue = item[field.key as keyof 出库数据];
+        
+        // If item value is null/undefined, don't match
+        if (itemValue == null) return false;
+        
+        // Convert to string and check if it includes the filter value
+        return itemValue.toString().toLowerCase().includes(filterValue);
+      })
+    );
+    setFilteredData(filtered);
   }, [stockOutData, filters])
 
   const handleChange = (key: string, value: string) => {
