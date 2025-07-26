@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { 查看货物编码 } from '../../../backend/database'
+import { 查看货物编码, 删除货物编码 } from '../../../backend/database'
 import { useRouter } from 'next/navigation'
 
 interface 货物编码数据 {
@@ -20,6 +20,7 @@ export default function ViewProductCodesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<{ [key: string]: string }>({})
+  const [selectedRow, setSelectedRow] = useState<number | null>(null) // 添加选中行状态
   const router = useRouter()
 
   const filterFields = [
@@ -76,16 +77,57 @@ export default function ViewProductCodesPage() {
     router.back()
   }
 
+  // 处理行点击事件
+  const handleRowClick = (index: number) => {
+    setSelectedRow(index === selectedRow ? null : index)
+  }
+
+  // 处理删除操作
+  const handleDelete = async () => {
+    if (selectedRow === null) return
+
+    try {
+      // 获取选中行的实际数据
+      const selectedItem = filteredData[selectedRow]
+      
+      if (!selectedItem) {
+        throw new Error('无法找到选中的记录')
+      }
+      
+      // 使用货物编码字段删除记录
+      await 删除货物编码(selectedItem.货物编码)
+      // 重新获取数据
+      const data = await 查看货物编码()
+      setProductCodesData(data || [])
+      setSelectedRow(null) // 重置选中行
+    } catch (err) {
+      setError('删除货物编码记录失败: ' + (err as Error).message)
+    }
+  }
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">查看货物编码</h1>
-        <button 
-          onClick={handleBack}
-          className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-        >
-          返回
-        </button>
+        <div className="flex space-x-2">
+          <button 
+            onClick={handleDelete}
+            disabled={selectedRow === null}
+            className={`px-4 py-2 rounded transition-colors ${
+              selectedRow === null 
+                ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed' 
+                : 'bg-red-500 hover:bg-red-600 text-white'
+            }`}
+          >
+            删除
+          </button>
+          <button 
+            onClick={handleBack}
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+          >
+            返回
+          </button>
+        </div>
       </div>
 
       {/* Filter Form */}
@@ -126,6 +168,7 @@ export default function ViewProductCodesPage() {
             <table className="w-full table-auto border-collapse text-sm">
               <thead>
                 <tr className="bg-gray-100 dark:bg-zinc-700 sticky top-0">
+                  <th className="border px-4 py-2 text-left text-gray-700 dark:text-gray-200 font-medium">序号</th>
                   {filterFields.map(field => (
                     <th key={field.key} className="border px-4 py-2 text-left text-gray-700 dark:text-gray-200 font-medium">
                       {field.label}
@@ -137,7 +180,16 @@ export default function ViewProductCodesPage() {
               <tbody>
                 {filteredData.length > 0 ? (
                   filteredData.map((item, rowIndex) => (
-                    <tr key={rowIndex} className="border-t hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors">
+                    <tr 
+                      key={rowIndex} 
+                      className={`border-t transition-colors cursor-pointer ${
+                        rowIndex === selectedRow 
+                          ? 'bg-blue-100 dark:bg-blue-900' 
+                          : 'hover:bg-gray-50 dark:hover:bg-zinc-700'
+                      }`}
+                      onClick={() => handleRowClick(rowIndex)}
+                    >
+                      <td className="border px-4 py-2 text-gray-600 dark:text-gray-300">{rowIndex + 1}</td>
                       {filterFields.map(field => (
                         <td key={field.key} className="border px-4 py-2 text-gray-600 dark:text-gray-300">
                           {item[field.key as keyof 货物编码数据]}
@@ -148,7 +200,7 @@ export default function ViewProductCodesPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={filterFields.length + 1} className="text-center p-8 text-gray-500 dark:text-gray-400">
+                    <td colSpan={filterFields.length + 2} className="text-center p-8 text-gray-500 dark:text-gray-400">
                       未找到匹配的货物编码记录
                     </td>
                   </tr>

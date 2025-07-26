@@ -279,3 +279,15 @@ export async function 添加货物编码(数据: 货物编码数据){
     return data;
 }
 
+export async function 删除货物编码(货物编码: string){
+    const { data, error } = await supabase
+    .schema('public')
+    .from('货物编码表')
+    .delete()
+    .eq('货物编码', 货物编码)
+    .select();
+    if (error) {
+      console.error('Error fetching stock data:', error);
+    }
+    return data;
+}
