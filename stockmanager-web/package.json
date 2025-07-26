@@ -2,9 +2,9 @@
   "name": "stockmanager-web",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
+"scripts": {
+    "dev": "next dev",
+    "build": "next build && nextjs-standalone-deployer.exe",
     "start": "next start",
     "lint": "next lint"
   },
