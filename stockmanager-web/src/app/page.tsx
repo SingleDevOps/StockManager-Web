@@ -22,6 +22,12 @@ const HomePage: React.FC = () => {
       case '查看出库':
         router.push('/stock-out')
         break
+      case '查看货物编码':
+        router.push('/view-product-codes')
+        break
+      case '查看销售汇总':
+        router.push('/view-sales-summary')
+        break
       // Add other cases as needed
     }
   }

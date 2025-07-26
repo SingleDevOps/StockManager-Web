@@ -1,4 +1,4 @@
-export default function StockInLayout({
+export default function ViewProductCodesLayout({
   children,
 }: {
   children: React.ReactNode

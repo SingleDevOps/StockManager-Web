@@ -1,4 +1,4 @@
-export default function StockOutLayout({
+export default function ViewSalesSummaryLayout({
   children,
 }: {
   children: React.ReactNode

@@ -94,7 +94,7 @@ export async function 查看出库() {
 export async function 查看货物编码() {
   const { data, error } = await supabase
     .schema('public')
-    .from('货物表')
+    .from('货物编码表')
     .select('*');
   if (error) {
     console.error('Error fetching stock data:', error);
