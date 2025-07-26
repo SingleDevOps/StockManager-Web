@@ -114,26 +114,46 @@ export async function 查看销售汇总(){
 }
 
 export async function 入库(数据: 入库数据){
+
     const { data, error } = await supabase
-    .schema('public')
-    .from('入库')
-    .insert(数据)
-    .select();
+        .schema('public')
+        .from('入库表')
+        .insert([数据])  // Use array format for insert
+        .select('*');  // Select all columns to get full record
+
     if (error) {
-      console.error('Error fetching stock data:', error);
+        // Log detailed error information for debugging
+        console.error('Error adding stock-in data:', {
+            error,
+            errorMsg: error.message,
+            details: error.details,
+            hint: error.hint
+        });
+        throw new Error(`入库失败: ${error.message || '未知错误'}`);
     }
+    
     return data;
 }
 
 export async function 出库(数据: 出库数据){
+
     const { data, error } = await supabase
-    .schema('public')
-    .from('出库')
-    .insert(数据)
-    .select();
+        .schema('public')
+        .from('出库表')
+        .insert([数据])  
+        .select('*');  // Select all columns to get full record
+
     if (error) {
-      console.error('Error fetching stock data:', error);
+        // Log detailed error information for debugging
+        console.error('Error adding stock-out data:', {
+            error,
+            errorMsg: error.message,
+            details: error.details,
+            hint: error.hint
+        });
+        throw new Error(`出库失败: ${error.message || '未知错误'}`);
     }
+    
     return data;
 }
 
@@ -142,8 +162,8 @@ export async function 出库(数据: 出库数据){
 export async function 添加库存(数据: 库存数据){
     const { data, error } = await supabase
     .schema('public')
-    .from('库存')
-    .insert(数据)
+    .from('库存表')
+    .insert([数据])
     .select();
     if (error) {
       console.error('Error fetching stock data:', error);
@@ -156,8 +176,8 @@ export async function 添加库存(数据: 库存数据){
 export async function 添加货物编码(数据: 货物编码数据){
     const { data, error } = await supabase
     .schema('public')
-    .from('货物编码')
-    .insert(数据)
+    .from('货物编码表')
+    .insert([数据])
     .select();
     if (error) {
       console.error('Error fetching stock data:', error);

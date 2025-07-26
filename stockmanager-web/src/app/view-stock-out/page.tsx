@@ -31,20 +31,21 @@ export default function StockOutPage() {
     { label: '备注', key: '备注' },
   ]
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await 查看出库()
-        setStockOutData(data || [])
-        setError(null)
-      } catch (err) {
-        setError('Failed to fetch stock-out data')
-        console.error('Error fetching stock-out data:', err)
-      } finally {
-        setLoading(false)
-      }
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const data = await 查看出库()
+      setStockOutData(data || [])
+      setError(null)
+    } catch (err) {
+      setError('Failed to fetch stock-out data')
+      console.error('Error fetching stock-out data:', err)
+    } finally {
+      setLoading(false)
     }
+  };
 
+  useEffect(() => {
     fetchData()
   }, [])
 
@@ -80,12 +81,20 @@ export default function StockOutPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">查看出库</h1>
-        <button 
-          onClick={handleBack}
-          className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-        >
-          返回
-        </button>
+        <div className="flex space-x-2">
+          <button 
+            onClick={fetchData}
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+          >
+            刷新
+          </button>
+          <button 
+            onClick={handleBack}
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+          >
+            返回
+          </button>
+        </div>
       </div>
 
       {/* Filter Form */}

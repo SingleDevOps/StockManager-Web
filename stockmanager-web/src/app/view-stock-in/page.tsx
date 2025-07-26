@@ -30,37 +30,38 @@ export default function StockInPage() {
     { label: '备注', key: '备注' },
   ]
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await 查看入库()
-        setStockInData(data || [])
-        setError(null)
-      } catch (err) {
-        setError('Failed to fetch stock-in data')
-        console.error('Error fetching stock-in data:', err)
-      } finally {
-        setLoading(false)
-      }
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const data = await 查看入库()
+      setStockInData(data || [])
+      setError(null)
+    } catch (err) {
+      setError('Failed to fetch stock-in data')
+      console.error('Error fetching stock-in data:', err)
+    } finally {
+      setLoading(false)
     }
+  };
 
+  useEffect(() => {
     fetchData()
   }, [])
 
-useEffect(() => {
-  const filtered = stockInData.filter(item =>
-    filterFields.every(field => {
-      const filterValue = filters[field.key]?.toLowerCase().trim();
-      if (!filterValue) return true; // If no filter value, include all items
-      
-      const itemValue = item[field.key as keyof 入库数据];
-      if (itemValue == null) return false; // If item value is null/undefined, don't match
-      
-      return itemValue.toString().toLowerCase().includes(filterValue);
-    })
-  );
-  setFilteredData(filtered);
-}, [stockInData, filters]);
+  useEffect(() => {
+    const filtered = stockInData.filter(item =>
+      filterFields.every(field => {
+        const filterValue = filters[field.key]?.toLowerCase().trim();
+        if (!filterValue) return true; // If no filter value, include all items
+        
+        const itemValue = item[field.key as keyof 入库数据];
+        if (itemValue == null) return false; // If item value is null/undefined, don't match
+        
+        return itemValue.toString().toLowerCase().includes(filterValue);
+      })
+    );
+    setFilteredData(filtered);
+  }, [stockInData, filters]);
 
   const handleChange = (key: string, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }))
@@ -74,12 +75,20 @@ useEffect(() => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">查看入库</h1>
-        <button 
-          onClick={handleBack}
-          className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-        >
-          返回
-        </button>
+        <div className="flex space-x-2">
+          <button 
+            onClick={fetchData}
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+          >
+            刷新
+          </button>
+          <button 
+            onClick={handleBack}
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+          >
+            返回
+          </button>
+        </div>
       </div>
 
       {/* Filter Form */}
