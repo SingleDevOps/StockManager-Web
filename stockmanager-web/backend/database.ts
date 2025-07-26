@@ -7,6 +7,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_API_KEY);
 // Get data from Supabase public schema, 库存表 table
 
 interface 入库数据{
+    序号?:number;
     日期: string;
     货物编码: string;
     货物名称: string;
@@ -17,6 +18,7 @@ interface 入库数据{
 }
 
 interface 出库数据{
+    序号?:number;
     日期: string;
     货物名称: string;
     货物编码: string;
@@ -135,6 +137,42 @@ export async function 入库(数据: 入库数据){
     return data;
 }
 
+export async function 删除入库记录(id: number) {
+    // 先尝试使用序号字段删除
+    let query = supabase
+        .schema('public')
+        .from('入库表')
+        .delete()
+        .eq('序号', id);
+
+    let { data, error } = await query;
+
+    // 如果使用序号字段删除失败，尝试使用id字段
+    if (error) {
+        query = supabase
+            .schema('public')
+            .from('入库表')
+            .delete()
+            .eq('序号', id);
+        
+        const result = await query;
+        data = result.data;
+        error = result.error;
+    }
+
+    if (error) {
+        console.error('Error deleting stock-in record:', {
+            error,
+            errorMsg: error.message,
+            details: error.details,
+            hint: error.hint
+        });
+        throw new Error(`删除入库记录失败: ${error.message || '未知错误'}`);
+    }
+    
+    return data;
+}
+
 export async function 出库(数据: 出库数据){
 
     const { data, error } = await supabase
@@ -157,6 +195,42 @@ export async function 出库(数据: 出库数据){
     return data;
 }
 
+export async function 删除出库记录(id: number) {
+    // 先尝试使用序号字段删除
+    let query = supabase
+        .schema('public')
+        .from('出库表')
+        .delete()
+        .eq('序号', id);
+
+    let { data, error } = await query;
+
+    // 如果使用序号字段删除失败，尝试使用id字段
+    if (error) {
+        query = supabase
+            .schema('public')
+            .from('出库表')
+            .delete()
+            .eq('序号', id);
+        
+        const result = await query;
+        data = result.data;
+        error = result.error;
+    }
+
+    if (error) {
+        console.error('Error deleting stock-out record:', {
+            error,
+            errorMsg: error.message,
+            details: error.details,
+            hint: error.hint
+        });
+        throw new Error(`删除出库记录失败: ${error.message || '未知错误'}`);
+    }
+    
+    return data;
+}
+
 // 添加库存
 
 export async function 添加库存(数据: 库存数据){
@@ -168,6 +242,26 @@ export async function 添加库存(数据: 库存数据){
     if (error) {
       console.error('Error fetching stock data:', error);
     }
+    return data;
+}
+
+export async function 删除库存记录(货物编码: string) {
+    const { data, error } = await supabase
+        .schema('public')
+        .from('库存表')
+        .delete()
+        .eq('货物编码', 货物编码);  // Using 货物编码 as the identifier
+
+    if (error) {
+        console.error('Error deleting stock record:', {
+            error,
+            errorMsg: error.message,
+            details: error.details,
+            hint: error.hint
+        });
+        throw new Error(`删除库存记录失败: ${error.message || '未知错误'}`);
+    }
+    
     return data;
 }
 

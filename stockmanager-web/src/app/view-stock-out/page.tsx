@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { 查看出库 } from '../../../backend/database'
+import { 查看出库, 删除出库记录 } from '../../../backend/database'
 import { useRouter } from 'next/navigation'
 
 interface 出库数据{
@@ -12,6 +12,8 @@ interface 出库数据{
     数量: number;
     备注: string;
     颜色: string;
+    id?: number; // 添加ID字段用于删除操作
+    序号?: number; // 添加序号字段
 }
 
 export default function StockOutPage() {
@@ -20,6 +22,7 @@ export default function StockOutPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<{ [key: string]: string }>({})
+  const [selectedRow, setSelectedRow] = useState<number | null>(null) // 添加选中行状态
   const router = useRouter()
 
   const filterFields = [
@@ -77,6 +80,37 @@ export default function StockOutPage() {
     router.back()
   }
 
+  // 处理行点击事件
+  const handleRowClick = (index: number) => {
+    setSelectedRow(index === selectedRow ? null : index);
+  };
+
+  // 处理删除操作
+  const handleDelete = async () => {
+    if (selectedRow === null) return;
+
+    try {
+      // 获取选中行的实际数据
+      const selectedItem = filteredData[selectedRow];
+      
+      if (!selectedItem) {
+        throw new Error('无法找到选中的记录');
+      }
+      
+      // 使用序号字段删除记录
+      if (!selectedItem.序号) {
+        throw new Error('选中的记录没有序号字段');
+      }
+      
+      await 删除出库记录(selectedItem.序号);
+      // 重新获取数据
+      fetchData();
+      setSelectedRow(null); // 重置选中行
+    } catch (err) {
+      setError('删除出库记录失败: ' + (err as Error).message);
+    }
+  }
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -87,6 +121,17 @@ export default function StockOutPage() {
             className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
           >
             刷新
+          </button>
+          <button 
+            onClick={handleDelete}
+            disabled={selectedRow === null}
+            className={`px-4 py-2 rounded transition-colors ${
+              selectedRow === null 
+                ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed' 
+                : 'bg-red-500 hover:bg-red-600 text-white'
+            }`}
+          >
+            删除
           </button>
           <button 
             onClick={handleBack}
@@ -135,6 +180,7 @@ export default function StockOutPage() {
             <table className="w-full table-auto border-collapse text-sm">
               <thead>
                 <tr className="bg-gray-100 dark:bg-zinc-700 sticky top-0">
+                  <th className="border px-4 py-2 text-left text-gray-700 dark:text-gray-200 font-medium">序号</th>
                   {filterFields.map(field => (
                     <th key={field.key} className="border px-4 py-2 text-left text-gray-700 dark:text-gray-200 font-medium">
                       {field.label}
@@ -146,7 +192,16 @@ export default function StockOutPage() {
               <tbody>
                 {filteredData.length > 0 ? (
                   filteredData.map((item, rowIndex) => (
-                    <tr key={rowIndex} className="border-t hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors">
+                    <tr 
+                      key={rowIndex} 
+                      className={`border-t transition-colors cursor-pointer ${
+                        rowIndex === selectedRow 
+                          ? 'bg-blue-100 dark:bg-blue-900' 
+                          : 'hover:bg-gray-50 dark:hover:bg-zinc-700'
+                      }`}
+                      onClick={() => handleRowClick(rowIndex)}
+                    >
+                      <td className="border px-4 py-2 text-gray-600 dark:text-gray-300">{rowIndex + 1}</td>
                       {filterFields.map(field => (
                         <td key={field.key} className="border px-4 py-2 text-gray-600 dark:text-gray-300">
                           {item[field.key as keyof 出库数据]}
@@ -157,7 +212,7 @@ export default function StockOutPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={filterFields.length + 1} className="text-center p-8 text-gray-500 dark:text-gray-400">
+                    <td colSpan={filterFields.length + 2} className="text-center p-8 text-gray-500 dark:text-gray-400">
                       未找到匹配的出库记录
                     </td>
                   </tr>
