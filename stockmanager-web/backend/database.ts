@@ -121,7 +121,6 @@ export async function 入库(数据: 入库数据){
         .schema('public')
         .from('入库表')
         .insert([数据])  // Use array format for insert
-        .select('*');  // Select all columns to get full record
 
     if (error) {
         // Log detailed error information for debugging
@@ -133,14 +132,42 @@ export async function 入库(数据: 入库数据){
         });
         throw new Error(`入库失败: ${error.message || '未知错误'}`);
     }
+    try{
+        await 增加库存(数据.货物编码, 数据.数量)
+    } catch(error){
+        throw new Error(`入库成功，但库存增加失败: ${error}`);
+    }
 }
+export async function 出库(数据: 出库数据){
 
+    const { data, error } = await supabase
+        .schema('public')
+        .from('出库表')
+        .insert([数据])  
+
+    if (error) {
+        // Log detailed error information for debugging
+        console.error('Error adding stock-out data:', {
+            error,
+            errorMsg: error.message,
+            details: error.details,
+            hint: error.hint
+        });
+        throw new Error(`出库失败: ${error.message || '未知错误'}`);
+    }
+    try{
+        await 减少库存(数据.货物编码, 数据.数量)
+    } catch(error){
+        throw new Error(`出库成功，但库存减少失败: ${error}`);
+    }
+    return data;
+}
 export async function 查看特定货物库存(货物编码:string){
     //获得原有特定货物编码货物的 '当前库存'
     const {data, error} = await supabase
     .schema('public')
     .from('库存表')
-    .select('当前库存')
+    .select('"当前库存"')
     .eq('货物编码',货物编码)
     .single();
 
@@ -153,7 +180,7 @@ export async function 查看特定货物库存(货物编码:string){
         });
         throw new Error(`删除入库记录失败: ${error.message || '未知错误'}`);
     }
-    return data;
+    return data.当前库存;
 }
 export async function 增加库存(货物编码: string, 数量: number){
     const 当前库存 = await 查看特定货物库存(货物编码);
@@ -162,7 +189,7 @@ export async function 增加库存(货物编码: string, 数量: number){
     .schema('public')
     .from('库存表')
     .update({
-        数量: 新库存,
+        当前库存: 新库存,
     })
     .eq('货物编码', 货物编码)
     
@@ -181,7 +208,7 @@ export async function 减少库存(货物编码: string, 数量: number) {
     .schema('public')
     .from('库存表')
     .update({
-      库存: 新库存,
+       当前库存: 新库存,
     })
     .eq('货物编码', 货物编码)
 
@@ -228,27 +255,7 @@ export async function 删除入库记录(id: number) {
     return data;
 }
 
-export async function 出库(数据: 出库数据){
 
-    const { data, error } = await supabase
-        .schema('public')
-        .from('出库表')
-        .insert([数据])  
-        .select('*');  // Select all columns to get full record
-
-    if (error) {
-        // Log detailed error information for debugging
-        console.error('Error adding stock-out data:', {
-            error,
-            errorMsg: error.message,
-            details: error.details,
-            hint: error.hint
-        });
-        throw new Error(`出库失败: ${error.message || '未知错误'}`);
-    }
-    
-    return data;
-}
 
 export async function 删除出库记录(id: number) {
     // 先尝试使用序号字段删除

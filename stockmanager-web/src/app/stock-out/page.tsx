@@ -108,13 +108,13 @@ export default function StockOutPage() {
             {inputFields.map(field => (
               <div key={field.key} className="flex flex-col">
                 <label className="text-sm mb-1 text-gray-700 dark:text-gray-300">
-                  {field.label} {field.key !== '备注' && '*'}
+                  {field.label} {['货物编码', '数量'].includes(field.key) ? '*' : ''}
                 </label>
                 <input
                   type={field.type}
                   value={entryData[field.key as keyof 出库数据] || (field.type === 'number' ? '' : '')}
                   onChange={e => handleChange(field.key, e.target.value)}
-                  required={field.key !== '备注'}
+                  required={field.key === '货物编码' || field.key === '数量'}
                   min={field.type === 'number' ? 0 : (field.type === 'date' ? undefined : undefined)}
                   className="p-3 border border-gray-300 dark:border-zinc-700 rounded bg-white dark:bg-zinc-900 text-black dark:text-white"
                   placeholder={field.type !== 'date' ? `输入${field.label}` : undefined}
