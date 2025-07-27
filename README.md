@@ -1,6 +1,6 @@
 # StockManager - 库存管理系统
 
-StockManager is a comprehensive inventory management system built with Next.js, React, and Electron. It allows businesses to track inventory, manage stock movements (in and out), and generate sales summaries. The application can run as a web application or as a desktop application via Electron.
+StockManager is a comprehensive inventory management system built with Next.js & React. It allows businesses to track inventory, manage stock movements (in and out), and generate sales summaries. The application can run as a web application or as a desktop application via Electron.
 
 ## Features
 
@@ -28,10 +28,6 @@ StockManager is a comprehensive inventory management system built with Next.js, 
 ### Backend
 - [Supabase](https://supabase.io/) - Open source Firebase alternative with PostgreSQL database
 - Custom database abstraction layer for inventory operations
-
-### Desktop Application
-- [Electron](https://www.electronjs.org/) - Framework for building cross-platform desktop apps
-- [electron-builder](https://www.electron.build/) - Complete solution to package and build Electron apps
 
 ## Project Structure
 
@@ -141,22 +137,6 @@ npm run start
 
 This will create an optimized production build and start the server.
 
-### Building Desktop Application
-
-To package the application as a desktop executable:
-
-1. Export the Next.js application to static files:
-   ```bash
-   npm run export
-   ```
-
-2. Package as Electron application:
-   ```bash
-   npm run electron:build
-   ```
-
-The packaged desktop application will be available in the `dist/` directory.
-
 ## Database Structure
 
 The application uses Supabase (PostgreSQL) with the following tables:
@@ -184,8 +164,6 @@ These values should also be configured in the [API_Secret.ts](file:///C:/StockMa
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run export` - Export as static files
-- `npm run electron:dev` - Run Electron app in development mode
-- `npm run electron:build` - Build Electron app for distribution
 
 ## Deployment
 
@@ -194,12 +172,6 @@ The application can be deployed to any platform that supports Next.js, such as:
 - Vercel (recommended)
 - Netlify
 - Traditional Node.js servers
-
-### Desktop Deployment
-The Electron-packaged application can be distributed as:
-- Windows executable (.exe)
-- macOS application (.app)
-- Linux package (depending on configuration)
 
 ## Contributing
 
