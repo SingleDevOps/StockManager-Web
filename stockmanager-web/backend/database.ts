@@ -133,8 +133,63 @@ export async function 入库(数据: 入库数据){
         });
         throw new Error(`入库失败: ${error.message || '未知错误'}`);
     }
-    
+}
+
+export async function 查看特定货物库存(货物编码:string){
+    //获得原有特定货物编码货物的 '当前库存'
+    const {data, error} = await supabase
+    .schema('public')
+    .from('库存表')
+    .select('当前库存')
+    .eq('货物编码',货物编码)
+    .single();
+
+    if (error) {
+        console.error('Error deleting stock-in record:', {
+            error,
+            errorMsg: error.message,
+            details: error.details,
+            hint: error.hint
+        });
+        throw new Error(`删除入库记录失败: ${error.message || '未知错误'}`);
+    }
     return data;
+}
+export async function 增加库存(货物编码: string, 数量: number){
+    const 当前库存 = await 查看特定货物库存(货物编码);
+    const 新库存 = 当前库存 + 数量;
+    const {data, error} = await supabase
+    .schema('public')
+    .from('库存表')
+    .update({
+        数量: 新库存,
+    })
+    .eq('货物编码', 货物编码)
+    
+
+    if (error){
+        throw new Error(`增加库存失败: ${error.message}`);
+    }
+    return data;
+}
+
+export async function 减少库存(货物编码: string, 数量: number) {
+  const 当前库存 = await 查看特定货物库存(货物编码);
+  const 新库存 = 当前库存 + (-1 * 数量);
+
+  const { data, error } = await supabase
+    .schema('public')
+    .from('库存表')
+    .update({
+      库存: 新库存,
+    })
+    .eq('货物编码', 货物编码)
+
+  if (error) {
+    throw new Error(`减少库存失败: ${error.message}`);
+  }
+
+  return data;
 }
 
 export async function 删除入库记录(id: number) {
@@ -233,17 +288,17 @@ export async function 删除出库记录(id: number) {
 
 // 添加库存
 
-export async function 添加库存(数据: 库存数据){
-    const { data, error } = await supabase
-    .schema('public')
-    .from('库存表')
-    .insert([数据])
-    .select();
-    if (error) {
-      console.error('Error fetching stock data:', error);
-    }
-    return data;
-}
+// export async function 添加库存(数据: 库存数据){
+//     const { data, error } = await supabase
+//     .schema('public')
+//     .from('库存表')
+//     .insert([数据])
+//     .select();
+//     if (error) {
+//       console.error('Error fetching stock data:', error);
+//     }
+//     return data;
+// }
 
 export async function 删除库存记录(货物编码: string) {
     const { data, error } = await supabase
